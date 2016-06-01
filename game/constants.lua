@@ -33,10 +33,10 @@ local constants = {
 
 constants.VERSION = '0.1.0'
 
-constants.IDENTITY = 'TheTrip'
+constants.IDENTITY = 'Darn!'
 
-constants.SCREEN_WIDTH = 480
-constants.SCREEN_HEIGHT = 300
+constants.SCREEN_WIDTH = 480 -- QHDTV
+constants.SCREEN_HEIGHT = 270
 constants.SCREEN_RECT = { 0, 0, constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT }
 constants.SCREEN_CENTER = { constants.SCREEN_WIDTH / 2, constants.SCREEN_HEIGHT / 2 }
 
