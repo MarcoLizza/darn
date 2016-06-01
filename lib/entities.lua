@@ -25,6 +25,7 @@ freely, subject to the following restrictions:
 -- MODULE DECLARATION ----------------------------------------------------------
 
 local Entities = {
+  _VERSION = '0.2.0'
 }
 
 -- MODULE OBJECT CONSTRUCTOR ---------------------------------------------------
@@ -40,7 +41,10 @@ end
 
 -- MODULE FUNCTIONS ------------------------------------------------------------
 
-function Entities:initialize(world)
+function Entities:initialize(comparator)
+  -- Store the entity sorting-comparator (optional).
+  self.comparator = comparator
+
   self:reset()
 end
 
@@ -51,20 +55,20 @@ end
 
 function Entities:update(dt)
   -- If there are any waiting recently added entities, we merge them in the
-  -- active entities list. The active list is kept sorted by entity
-  -- priority.
+  -- active entities list. The active list is kept sorted, if a proper
+  -- comparator was provided.
   if #self.incoming > 0 then
     for _, entity in ipairs(self.incoming) do
       table.insert(self.active, entity);
     end
     self.incoming = {}
-    table.sort(self.active, function(a, b)
-          return a.priority < b.priority
-        end)
+    if self.comparator then
+      table.sort(self.active, self.comparator)
+    end
   end
   -- Update and keep track of the entities that need to be removed.
   --
-  -- Since we need to keep the entities list sorted, we remove "dead"
+  -- Since we need to keep the entities relative sorting, we remove "dead"
   -- entities from the back to front. To achive this we "push" the
   -- indices at the front of the to-be-removed list. That way, when
   -- we traverse it we can safely remove the elements as we go.
@@ -99,24 +103,23 @@ function Entities:push(entity)
   -- add new entities; however we cannot modify the active entities list
   -- content while we iterate.
   --
-  -- We are using the "table" namespace functions since we are continously
-  -- scambling the content by reordering it.
+  -- We are using the "table" namespace functions since we are possibly
+  -- continously scambling the content by reordering it.
   table.insert(self.incoming, entity)
-
 end
 
 function Entities:colliding()
   local colliding = {}
-  -- Naive O(n^2) collision resulution algorithm.
-  -- (with not projection at all).
+  -- Naive O(n^2) collision resulution algorithm (with not projection at
+  -- all).
   for _, this in ipairs(self.active) do
-    -- We test for the presence of the "radius" property. We also ignore the
-    -- "ephemeral" entities (e.g. sparkles, smoke, bubbles, etc...) since
-    -- they do not count for collisions.
-    if this.radius and not this.ephemeral then
+    -- We test for the presence of the [collide] method. If not present, it's
+    -- and "ephemeral" entity (e.g. sparkles, smoke, bubbles, etc...) that we
+    -- will ignore since it does not count for collisions.
+    if this.collide then
       for _, that in ipairs(self.active) do
         -- We also check if we are testing an item with itself!
-        if this ~= that and that.radius and not that.ephemeral and this:collide(that) then
+        if this ~= that and that.collide and this:collide(that) then
           colliding[#colliding + 1] = { this, that }
         end
       end
