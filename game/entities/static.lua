@@ -22,61 +22,44 @@ freely, subject to the following restrictions:
 
 -- MODULE INCLUSIONS -----------------------------------------------------------
 
+local Entity = require('game.entities.entity')
+
+local graphics = require('lib.graphics')
 local soop = require('lib.soop')
-local utils = require('lib.utils')
 
 -- MODULE DECLARATION ----------------------------------------------------------
 
-local Entity = soop.class()
+-- MODULE OBJECT CONSTRUCTOR ---------------------------------------------------
 
--- MODULE FUNCTION -------------------------------------------------------------
+local Static = soop.class(Entity)
 
-function Entity:initialize(parameters)
-  self.id = parameters.id -- can be [nil] for unnamed entities
-  self.position = parameters.position
-  self.angle = parameters.angle
-  self.life = parameters.life or math.huge -- if not provided, entity will be indestructable
+-- LOCAL CONSTANTS -------------------------------------------------------------
+
+-- LOCAL FUNCTIONS -------------------------------------------------------------
+
+-- MODULE FUNCTIONS ------------------------------------------------------------
+
+function Static:initialize(parameters)
+  self:base('initialize', parameters)
+
+  self.type = 'static'
+  self.priority = parameters.priority
+  self.reference = self.life
+
+  self.image = love.graphics.newImage(parameters.image)
 end
 
-function Entity:update(dt)
-  -- Decrease the current life if the entity is not everlasting.
-  if self.life ~= math.huge then
-    self.life = math.max(0, self.life - dt)
-  end
-end
+function Static:draw()
+  -- We don't neet to check if the entity is alive, here. Only living entities
+  -- are redrawn!
 
-function Entity:hit(damage)
-  damage = damage or 1
-  if self.life ~= math.huge and self.life > 0 then
-    self.life = math.max(0, self.life - damage)
-  end
-end
+  local x, y = unpack(self.position)
 
-function Entity:kill()
-  self.life = 0
-end
-
-function Entity:is_alive()
-  return self.life > 0
-end
-
-function Entity:collide(other)
-  local distance = utils.distance(self.position, other.position)
-  return distance <= (self.radius + other.radius)
-end
-
-function Entity:cast(modulo)
-  local vx, vy = math.cos(self.angle) * modulo, math.sin(self.angle) * modulo
-  local cx, cy = unpack(self.position)
-  return cx + vx, cy + vy
-end
-
-function Entity:rotate(delta)
-  self.angle = self.angle + delta
+  graphics.image(self.image, x, y)
 end
 
 -- END OF MODULE ---------------------------------------------------------------
 
-return Entity
+return Static
 
 -- END OF FILE -----------------------------------------------------------------
