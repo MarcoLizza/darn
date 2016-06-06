@@ -50,7 +50,7 @@ end
 --    frequency = 6,
 --    on_loop = nil,
 --  },
---  animations = {
+--  sequences = {
 --    ['running'] = { filename = 'assets/image.png', offset = 0, count = 2 }
 --  }
 --}
@@ -60,20 +60,20 @@ function Animator:initialize(parameters)
   local defaults = parameters.defaults
   
   local animations = {}
-  for id, specs in pairs(parameters.animations) do
+  for id, sequence in pairs(parameters.sequences) do
     -- Search in the images' cache for the specified image. If not present,
     -- load and update the cache content.
-    local image = images[specs.filename]
+    local image = images[sequence.filename]
     if not image then
-      image = love.graphics.newImage(specs.filename)
-      images[specs.filename] = image
+      image = love.graphics.newImage(sequence.filename)
+      images[sequence.filename] = image
     end
 
     -- Create the animation and configure it.
     local animation = Animation.new()
-    animation:initialize(image, specs.width or defaults.width, specs.height or defaults.height,
-        specs.offset, specs.count)
-    animation:configure(specs.frequency or defaults.frequency, specs.on_loop or defaults.on_loop)
+    animation:initialize(image, sequence.width or defaults.width, sequence.height or defaults.height,
+        sequence.offset, sequence.count)
+    animation:configure(sequence.frequency or defaults.frequency, sequence.on_loop or defaults.on_loop)
 
     animations[id] = animation
   end
