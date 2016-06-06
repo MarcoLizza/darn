@@ -45,9 +45,15 @@ function soop.class(base)
       local self = setmetatable({}, proto)
       return self
     end
-  -- Provide a help function to access the base reference.
-  proto.base = function(self)
-      return self.__base
+  -- Call the superclass [method] on the current instance reference (in order to
+  -- manipulate this istance attributes) by passing the provided variable amount
+  -- of arguments.
+  --
+  -- We are referring the [base] variable in order to create a closure to
+  -- retain the correct reference to the base class. This is required to
+  -- perform multi-level inheritance.
+  proto.base = function(self, method, ...)
+      return base[method](self, ...)
     end
   return proto
 end
