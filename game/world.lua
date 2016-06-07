@@ -29,6 +29,7 @@ local Static = require('game.entities.static')
 local Hud = require('game.hud')
 
 local Entities = require('lib.entities')
+local Shaker = require('lib.shaker')
 local Tweener = require('lib.tweener')
 
 -- MODULE DECLARATION ----------------------------------------------------------
@@ -43,13 +44,16 @@ local world = {
 -- MODULE FUNCTIONS ------------------------------------------------------------
 
 function world:initialize()
-  self.tweener = Tweener.new()
-  self.tweener:initialize()
-
   self.entities = Entities.new()
   self.entities:initialize(function(a, b) -- lower priority => earlier drawn
         return a.priority < b.priority
       end)
+
+  self.shaker = Shaker.new()
+  self.shaker:initialize()
+  
+  self.tweener = Tweener.new()
+  self.tweener:initialize()
 
   self.hud = Hud.new()
   self.hud:initialize()
@@ -107,6 +111,9 @@ function world:reset()
       })
   self.entities:push(television)
 
+  -- Reset the camera shaker to default state.
+  self.shaker:reset()
+
   -- Reset the HUD state, too.
   self.hud:reset()
 end
@@ -119,16 +126,19 @@ end
 function world:update(dt)
   if self.interact and self.can_interact then
   end
-  
-  self.tweener:update(dt)
 
   self.entities:update(dt)
+  self.shaker:update(dt)
+  self.tweener:update(dt)
 
   self.hud:update(dt)
 end
 
 function world:draw()
-  self.entities:draw()
+  self.shaker:pre()
+    self.entities:draw()
+  self.shaker:post()
+  
   self.hud:draw()
 end
 

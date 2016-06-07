@@ -79,8 +79,8 @@ function love.load(args)
   -- Initializes the input handler.
   _input = Input.new()
   _input:initialize({
-        ['space'] = 'continuous',
-        ['action'] = 'action'
+        ['z'] = 'action',
+        ['x'] = 'action'
       }, {
         ['continuous'] = 0,
         ['action'] = 0.20
@@ -94,7 +94,7 @@ function love.load(args)
       }, {
         level = 0
       })
-  _stateful:switch_to('splash')
+  _stateful:switch_to('game')
 end
 
 function love.keypressed(key, scancode, isrepeat)
