@@ -39,8 +39,8 @@ local Animated = soop.class(Entity)
 -- MODULE FUNCTIONS ------------------------------------------------------------
 
 function Animated:initialize(parameters)
-  self:base('initialize', parameters)
-  
+  Entity.initialize(self, parameters)
+
   self.type = 'animated'
   self.priority = parameters.priority
   self.reference = self.life

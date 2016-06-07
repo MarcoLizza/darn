@@ -29,31 +29,22 @@ local soop = {
 
 function soop.class(base)
   local proto = {}
-  -- If a base class is defined, the copy all the fiels (mostly functions)
-  -- and store a reference to the base class. This is an instant snapshot,
-  -- any new field defined runtime in the base class won't be visible in the
-  -- derived class.
+  -- If a base class is defined, the copy all the functions.
+  --
+  -- This is an instant snapshot, any new field defined runtime in the base
+  -- class won't be visible in the derived class.
   if base then
     for key, value in pairs(base) do
-      proto[key] = value
+      if type(value) == 'function' then
+        proto[key] = value
+      end
     end
-    proto.__base = base
   end
   -- This is the standard way in Lua to implement classes.
   proto.__index = proto
   proto.new = function()
       local self = setmetatable({}, proto)
       return self
-    end
-  -- Call the superclass [method] on the current instance reference (in order to
-  -- manipulate this istance attributes) by passing the provided variable amount
-  -- of arguments.
-  --
-  -- We are referring the [base] variable in order to create a closure to
-  -- retain the correct reference to the base class. This is required to
-  -- perform multi-level inheritance.
-  proto.base = function(self, method, ...)
-      return base[method](self, ...)
     end
   return proto
 end

@@ -40,7 +40,7 @@ local Static = soop.class(Entity)
 -- MODULE FUNCTIONS ------------------------------------------------------------
 
 function Static:initialize(parameters)
-  self:base('initialize', parameters)
+  Entity.initialize(self, parameters)
 
   self.type = 'static'
   self.priority = parameters.priority
