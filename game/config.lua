@@ -11,6 +11,14 @@ return {
     shaking = {
       factor = 3
     },
+    timeouts = {
+      music_in = 1,
+      fade_in = 1,
+      intro = 3,
+      intro_out = 1,
+      fade_out = 3,
+      limb = 2
+    },
     strength = 100,
     damage = {
       head = 3,

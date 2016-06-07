@@ -64,7 +64,7 @@ function Animated:initialize(parameters)
 end
 
 function Animated:update(dt)
-  self:base('update', dt)
+  Entity.update(self, dt)
 
   self.animator:update(dt)
 end
@@ -75,6 +75,12 @@ function Animated:draw()
 
   local x, y = unpack(self.position)
   self.animator:draw(x, y)
+end
+
+function Animated:switch_to(index)
+  -- If the index is the current active, no change will be performed and the
+  -- current animation will keep on rolling.
+  self.animator:switch_to(index)
 end
 
 -- END OF MODULE ---------------------------------------------------------------

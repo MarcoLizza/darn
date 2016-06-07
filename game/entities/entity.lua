@@ -33,8 +33,8 @@ local Entity = soop.class()
 
 function Entity:initialize(parameters)
   self.id = parameters.id -- can be [nil] for unnamed entities
-  self.position = parameters.position
-  self.angle = parameters.angle
+  self.position = parameters.position or { 0, 0 }
+  self.angle = parameters.angle or 0
   self.life = parameters.life or math.huge -- if not provided, entity will be indestructable
 end
 

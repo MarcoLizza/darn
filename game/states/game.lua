@@ -44,7 +44,7 @@ function game:initialize(environment)
 
   self.audio = Audio.new()
   self.audio:initialize({
-      ['bgm'] = { file = 'assets/sounds/everyday.ogg', overlayed = false, looping = true, mode = 'stream' }
+--      ['bgm'] = { file = 'assets/sounds/bgm.ogg', overlayed = false, looping = true, mode = 'stream' }
     })
 
   self.world:initialize()
@@ -57,7 +57,7 @@ function game:enter()
   
   -- Start the background music and create a tweener to fade in both the
   -- graphics and the audio.
-  self.audio:play('bgm', 1.0)
+--  self.audio:play('bgm', 1.0)
   self.tweener:linear(config.game.timeouts.music_in,
       function(ratio)
         love.audio.setVolume(ratio)
@@ -149,11 +149,11 @@ function game:draw()
 
   if self.state == 'fade-in' or self.state == 'intro' then
     graphics.fill('black', 191)
-    graphics.text('THE TRIP',
+    graphics.text('DARN!',
       constants.SCREEN_RECT, 'retro-computer', 'white', 'center', 'middle', 2, 191)
   elseif self.state == 'intro-out' then
     graphics.fill('black', self.alpha)
-    graphics.text('THE TRIP',
+    graphics.text('DARN!',
       constants.SCREEN_RECT, 'retro-computer', 'white', 'center', 'middle', 2, self.alpha)
   elseif self.state == 'done' then
     graphics.fill('black')

@@ -23,7 +23,6 @@ freely, subject to the following restrictions:
 -- MODULE INCLUSIONS -----------------------------------------------------------
 
 local config = require('game.config')
-local constants = require('game.constants')
 local Animated = require('game.entities.animated')
 local Static = require('game.entities.static')
 local Hud = require('game.hud')
@@ -39,7 +38,27 @@ local world = {
 
 -- LOCAL CONSTANTS -------------------------------------------------------------
 
+local LIMBS = {
+  { id = 'left-leg', damage = 0.05, tuning = 0.05, filename = 'assets/data/left-leg.png' },
+  { id = 'right-leg', damage = 0.05, tuning = 0.05, filename = 'assets/data/right-leg.png' },
+  { id = 'left-punch', damage = 0.03, tuning = 0.07, filename = 'assets/data/left-punch.png' },
+  { id = 'right-punch', damage = 0.03, tuning = 0.07, filename = 'assets/data/right-punch.png' },
+  { id = 'head', damage = 0.01, tuning = 0.03, filename = 'assets/data/head.png' }
+}
+
 -- LOCAL FUNCTIONS -------------------------------------------------------------
+
+-- Computes the change in the range [0, 1] for the television to go off-synch
+-- give the current tuning factor (in the range [0, 1])
+function compute_chance(tuning)
+  if tuning < 0.75 then
+    local chance = 1 - (tuning / 0.75)
+    local roll = love.math.random()
+    local occurred = roll < chance
+    return chance, occurred
+  end
+  return 0, false
+end
 
 -- MODULE FUNCTIONS ------------------------------------------------------------
 
@@ -63,53 +82,14 @@ function world:reset()
   -- Reset the world "age" to zero. Also, pick the first scene as the current
   -- one and clear the "next" scene reference (will be detected automatically
   -- depending on the age)
-  self.state = 'normal'
-  self.age = 0
-  self.can_interact = true
-  self.interact = false
+  self.damage = 0.0
+  self.tuning = 1.0
+  self.would_interact = false
 
   -- Reset the entity manager and add the the player one at the center of the
   -- screen.
   self.entities:reset()
-  
-  local background = Static.new()
-  background:initialize({
-        id = 'background',
-        position = { 0, 0 },
-        angle = 0,
-        life = math.huge,
-        image = 'assets/data/background.png',
-      })
-  self.entities:push(background)
-
-  local screen = Animated.new()
-  screen:initialize({
-        id = 'screen',
-        position = { 0, 0 },
-        angle = 0,
-        life = math.huge,
-        animations = {
-          width = 480,
-          height = 300,
-          frequency = 4, -- 250ms per frame
-          on_loop = nil,
-          sequences = {
-            ['static'] = 'assets/data/static.png',
-            ['channel'] = 'assets/data/channel.png'
-          }
-        }
-      })
-  self.entities:push(screen)
-
-  local television = Static.new()
-  television:initialize({
-        id = 'television',
-        position = { 0, 0 },
-        angle = 0,
-        life = math.huge,
-        image = 'assets/data/television.png'
-      })
-  self.entities:push(television)
+  self:setup()
 
   -- Reset the camera shaker to default state.
   self.shaker:reset()
@@ -120,13 +100,41 @@ end
 
 function world:input(keys, dt)
   -- If the player interact with the scene, keep track of it!
-  self.interact = keys and keys.pressed['space']
+  self.would_interact = keys and keys.pressed['space']
 end
 
 function world:update(dt)
-  if self.interact and self.can_interact then
+  local limb = self.entities:find(function(entity)
+        return entity.id == 'limb'
+      end)
+  
+  local can_interact = not limb
+  
+  if self.would_interact and can_interact then
+    self:interact()
   end
 
+  -- After the interaction, check if the damage was too much. If the television
+  -- is not damaged beyond repair, handle the tuning and damage.
+  self.wrecked = self.damage >= 1.0
+  
+  if not self.wrecked then
+    -- We are decreasing the tuning by a costant factor over time. When below
+    -- a certaing threshold the television could go out of synch.
+    self.tuning = math.min(1.0, self.tuning - 0.01 * dt)
+
+    local chance, occurred = compute_chance(self.tuning)
+    if chance == 0.0 then
+      self:switch_to('display')
+    elseif chance > 0.0 and occurred then
+      self:switch_to('static')
+    end
+
+    -- We also decrease the current damage. Will reset to zero over time.
+    self.damage = math.max(0.0, self.damage - 0.1 * dt)
+  end
+
+  -- Handle the submodules updates.
   self.entities:update(dt)
   self.shaker:update(dt)
   self.tweener:update(dt)
@@ -140,6 +148,70 @@ function world:draw()
   self.shaker:post()
   
   self.hud:draw()
+end
+
+function world:switch_to(index)
+  local screen = self.entities:find(function(entity)
+        return entity.id == 'screen'
+      end)
+  
+  screen:switch_to(index)
+end
+
+function world:setup()
+  local background = Static.new()
+  background:initialize({
+        id = 'background',
+        priority = 0,
+        life = math.huge,
+        image = 'assets/data/background.png',
+      })
+  self.entities:push(background)
+
+  local screen = Animated.new()
+  screen:initialize({
+        id = 'screen',
+        priority = 1,
+        life = math.huge,
+        animations = {
+          width = 480,
+          height = 300,
+          frequency = 4, -- 250ms per frame
+          on_loop = nil,
+          sequences = {
+            ['static'] = 'assets/data/static.png',
+            ['display'] = 'assets/data/display.png'
+          },
+          default = 'display'
+        }
+      })
+  self.entities:push(screen)
+
+  local television = Static.new()
+  television:initialize({
+        id = 'television',
+        priority = 2,
+        life = math.huge,
+        image = 'assets/data/television.png'
+      })
+  self.entities:push(television)
+end
+
+function world:interact()
+  local params = LIMBS[love.math.random(#LIMBS)] -- get a random limb
+  
+  local limb = Static.new()
+  limb:initialize({
+        id = 'limb',
+        life = config.game.timeouts.limb,
+        image = params.filename,
+      })
+  self.entities:push(limb)
+  
+  self.damage = math.min(0.0, self.damage + params.damage)
+  self.tuning = math.min(0.0, self.tuning + params.tuning)
+  
+  self.shaker:add(params.damage * 100)
 end
 
 -- END OF MODULE -------------------------------------------------------------
