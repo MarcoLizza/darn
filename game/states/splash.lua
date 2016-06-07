@@ -29,12 +29,12 @@ local easing = require('lib.easing')
 
 local splash = {
   states = {
-    { mode = 'fade-in', delay = 1, file = 'assets/1gam.png' },
-    { mode = 'display', delay = 5, file = 'assets/1gam.png' },
-    { mode = 'cross-out', delay = 0.25, file = 'assets/1gam.png' },
-    { mode = 'cross-in', delay = 0.25, file = 'assets/love2d.png' },
-    { mode = 'display', delay = 5, file = 'assets/love2d.png' },
-    { mode = 'fade-out', delay = 0.25, file = 'assets/love2d.png' }
+    { mode = 'fade-in', delay = 1, file = 'assets/images/1gam.png' },
+    { mode = 'display', delay = 5, file = 'assets/images/1gam.png' },
+    { mode = 'cross-out', delay = 0.25, file = 'assets/images/1gam.png' },
+    { mode = 'cross-in', delay = 0.25, file = 'assets/images/love2d.png' },
+    { mode = 'display', delay = 5, file = 'assets/images/love2d.png' },
+    { mode = 'fade-out', delay = 0.25, file = 'assets/images/love2d.png' }
   }
 }
 
