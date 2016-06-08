@@ -39,11 +39,11 @@ local world = {
 -- LOCAL CONSTANTS -------------------------------------------------------------
 
 local LIMBS = {
-  { id = 'left-leg', damage = 0.05, tuning = 0.05, filename = 'assets/data/left-leg.png' },
-  { id = 'right-leg', damage = 0.05, tuning = 0.05, filename = 'assets/data/right-leg.png' },
-  { id = 'left-punch', damage = 0.03, tuning = 0.07, filename = 'assets/data/left-punch.png' },
-  { id = 'right-punch', damage = 0.03, tuning = 0.07, filename = 'assets/data/right-punch.png' },
-  { id = 'head', damage = 0.01, tuning = 0.03, filename = 'assets/data/head.png' }
+  { id = 'left-leg', damage = 0.05, tuning = 0.05, filename = 'assets/data/limb-left-leg.png' },
+  { id = 'right-leg', damage = 0.05, tuning = 0.05, filename = 'assets/data/limb-right-leg.png' },
+  { id = 'left-punch', damage = 0.03, tuning = 0.07, filename = 'assets/data/limb-left-punch.png' },
+  { id = 'right-punch', damage = 0.03, tuning = 0.07, filename = 'assets/data/limb-right-punch.png' },
+  { id = 'head', damage = 0.01, tuning = 0.03, filename = 'assets/data/limb-head.png' }
 }
 
 -- LOCAL FUNCTIONS -------------------------------------------------------------
@@ -100,7 +100,7 @@ end
 
 function world:input(keys, dt)
   -- If the player interact with the scene, keep track of it!
-  self.would_interact = keys and keys.pressed['space']
+  self.would_interact = keys and keys.pressed['x']
 end
 
 function world:update(dt)
@@ -203,13 +203,14 @@ function world:interact()
   local limb = Static.new()
   limb:initialize({
         id = 'limb',
+        priority = 3,
         life = config.game.timeouts.limb,
         image = params.filename,
       })
   self.entities:push(limb)
   
-  self.damage = math.min(0.0, self.damage + params.damage)
-  self.tuning = math.min(0.0, self.tuning + params.tuning)
+  self.damage = math.max(0.0, self.damage + params.damage)
+  self.tuning = math.min(1.0, self.tuning + params.tuning)
   
   self.shaker:add(params.damage * 100)
 end

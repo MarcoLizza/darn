@@ -17,7 +17,7 @@ return {
       intro = 3,
       intro_out = 1,
       fade_out = 3,
-      limb = 2
+      limb = 0.5
     },
     strength = 100,
     damage = {
