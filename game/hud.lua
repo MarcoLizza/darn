@@ -22,7 +22,8 @@ freely, subject to the following restrictions:
 
 -- MODULE INCLUSIONS -----------------------------------------------------------
 
-local Tweener = require('lib.tweener')
+local constants = require('game.constants')
+local graphics = require('lib.graphics')
 
 -- MODULE DECLARATION ----------------------------------------------------------
 
@@ -44,9 +45,8 @@ end
 
 -- MODULE FUNCTIONS ------------------------------------------------------------
 
-function Hud:initialize()
-  self.tweener = Tweener.new()
-  self.tweener:initialize()
+function Hud:initialize(world)
+  self.world = world
   
   self:reset()
 end
@@ -55,10 +55,11 @@ function Hud:reset()
 end
 
 function Hud:update(dt)
-  self.tweener:update(dt)
 end
 
 function Hud:draw()
+  local message = string.format('TUNING: %.2f | DAMAGE : %.2f', self.world.tuning, self.world.damage)
+  graphics.text(message, constants.SCREEN_RECT, 'silkscreen', 'white', 'left', 'bottom')
 end
 
 -- END OF MODULE ---------------------------------------------------------------

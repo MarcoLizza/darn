@@ -19,7 +19,7 @@ return {
       fade_out = 3,
       limb = 0.5
     },
-    strength = 100,
+    strength = 25,
     damage = {
       head = 3,
       punch = 5,

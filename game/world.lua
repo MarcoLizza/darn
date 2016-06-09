@@ -75,7 +75,7 @@ function world:initialize()
   self.tweener:initialize()
 
   self.hud = Hud.new()
-  self.hud:initialize()
+  self.hud:initialize(self)
 end
 
 function world:reset()
@@ -121,7 +121,7 @@ function world:update(dt)
   if not self.wrecked then
     -- We are decreasing the tuning by a costant factor over time. When below
     -- a certaing threshold the television could go out of synch.
-    self.tuning = math.min(1.0, self.tuning - 0.01 * dt)
+    self.tuning = math.min(1.0, self.tuning - 0.03 * dt)
 
     local chance, occurred = compute_chance(self.tuning)
     if chance == 0.0 then
@@ -131,7 +131,7 @@ function world:update(dt)
     end
 
     -- We also decrease the current damage. Will reset to zero over time.
-    self.damage = math.max(0.0, self.damage - 0.1 * dt)
+    self.damage = math.max(0.0, self.damage - 0.01 * dt)
   end
 
   -- Handle the submodules updates.
