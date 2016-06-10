@@ -34,19 +34,26 @@ function soop.class(base)
   -- This is an instant snapshot, any new field defined runtime in the base
   -- class won't be visible in the derived class.
   if base then
-    for key, value in pairs(base) do
-      if type(value) == 'function' then
-        proto[key] = value
-      end
-    end
+    soop.implement(base)
   end
   -- This is the standard way in Lua to implement classes.
   proto.__index = proto
-  proto.new = function()
+  proto.new = function(params)
       local self = setmetatable({}, proto)
+      if self.__ctor then
+        self.__ctor(params)
+      end
       return self
     end
   return proto
+end
+
+function soop.implement(model)
+  for key, value in pairs(base) do
+    if type(value) == 'function' then
+      proto[key] = value
+    end
+  end
 end
 
 -- END OF MODULE ---------------------------------------------------------------
