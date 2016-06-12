@@ -99,21 +99,24 @@ function world:reset()
 end
 
 function world:input(keys, dt)
-  -- If the player interact with the scene, keep track of it!
-  self.would_interact = keys and keys.pressed['x']
-end
+  if not keys then
+    return
+  end
+  
+  local would_interact = keys.pressed['x']
 
-function world:update(dt)
   local limb = self.entities:find(function(entity)
         return entity.id == 'limb'
       end)
   
   local can_interact = not limb
   
-  if self.would_interact and can_interact then
+  if would_interact and can_interact then
     self:interact()
   end
+end
 
+function world:update(dt)
   -- After the interaction, check if the damage was too much. If the television
   -- is not damaged beyond repair, handle the tuning and damage.
   self.wrecked = self.damage >= 1.0
@@ -121,7 +124,7 @@ function world:update(dt)
   if not self.wrecked then
     -- We are decreasing the tuning by a costant factor over time. When below
     -- a certaing threshold the television could go out of synch.
-    self.tuning = math.min(1.0, self.tuning - 0.03 * dt)
+    self.tuning = math.max(0.0, self.tuning - 0.03 * dt)
 
     local chance, occurred = compute_chance(self.tuning)
     if chance == 0.0 then
@@ -148,6 +151,10 @@ function world:draw()
   self.shaker:post()
   
   self.hud:draw()
+end
+
+function world:is_finished()
+  return self.damage >= 1.0
 end
 
 function world:switch_to(index)
@@ -209,7 +216,7 @@ function world:interact()
       })
   self.entities:push(limb)
   
-  self.damage = math.max(0.0, self.damage + params.damage)
+  self.damage = math.min(1.0, self.damage + params.damage)
   self.tuning = math.min(1.0, self.tuning + params.tuning)
   
   self.shaker:add(params.damage * 100)

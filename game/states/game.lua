@@ -87,8 +87,13 @@ end
 
 function game:input(keys, dt)
   -- We pass a nil input if we are not ready.
-  if self.state == 'running' or self.state == 'fade-out' then
+  if self.state == 'running' then
     self.world:input(keys, dt)
+  elseif self.state == 'done' then
+    if keys.pressed['z'] then
+      self.world:reset()
+      self.state = 'running'
+    end
   else
     self.world:input(nil, dt)
   end
@@ -120,19 +125,8 @@ function game:update(dt)
   end
 
   -- If the world has come to an end, just fade out.
-  if self.world.state == 'finishing' then
-    self.world.state = 'finished'
-    
-    self.state = 'fade-out'
-    self.alpha = 0
-    self.tweener:linear(config.game.timeouts.fade_out,
-        function(ratio)
-          self.alpha = math.floor(ratio * 255)
-          love.audio.setVolume(1 - ratio)
-        end,
-        function()
-          self.state = 'done'
-        end)
+  if self.world:is_finished() then
+    self.state = 'done'
   end
   
   return nil
@@ -156,9 +150,11 @@ function game:draw()
     graphics.text('DARN!',
       constants.SCREEN_RECT, 'retro-computer', 'white', 'center', 'middle', 2, self.alpha)
   elseif self.state == 'done' then
-    graphics.fill('black')
-    graphics.text('THE END',
+    graphics.fill('black', 127)
+    graphics.text('WRECKED!',
       constants.SCREEN_RECT, 'retro-computer', 'white', 'center', 'middle', 2)
+    graphics.text('PRESS Z TO RESTART',
+      constants.SCREEN_RECT, 'retro-computer', 'white', 'center', 'bottom', 1)
   end
 
   -- Fade the display if needed, by overlapping a translucent black rectangle.
@@ -167,8 +163,6 @@ function game:draw()
   elseif self.state == 'intro' then
   elseif self.state == 'intro-out' then
   elseif self.state == 'running' then
-  elseif self.state == 'fade-out' then
-    graphics.fill('black', self.alpha)
   elseif self.state == 'done' then
   end
 
