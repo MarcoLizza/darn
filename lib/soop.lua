@@ -34,7 +34,7 @@ function soop.class(base)
   -- This is an instant snapshot, any new field defined runtime in the base
   -- class won't be visible in the derived class.
   if base then
-    soop.implement(base)
+    soop.implement(proto, base)
   end
   -- This is the standard way in Lua to implement classes.
   proto.__index = proto
@@ -48,8 +48,8 @@ function soop.class(base)
   return proto
 end
 
-function soop.implement(model)
-  for key, value in pairs(base) do
+function soop.implement(proto, model)
+  for key, value in pairs(model) do
     if type(value) == 'function' then
       proto[key] = value
     end
