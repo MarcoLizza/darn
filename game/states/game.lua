@@ -104,8 +104,10 @@ function game:update(dt)
 
   self.audio:update(dt)
 
-  self.world:update(dt)
-  
+  if self.state == 'running' then
+    self.world:update(dt)
+  end
+
   -- Process the sequence of tweeners, untils it's finished!
   if self.sequence_move_to_next and self.sequence_index < #self.sequence then
     self.sequence_index = self.sequence_index + 1
