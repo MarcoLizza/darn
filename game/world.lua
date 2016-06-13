@@ -154,7 +154,7 @@ function world:draw()
 end
 
 function world:is_finished()
-  return self.damage >= 1.0
+  return self.damage >= 1.0 or self.tuning <= 0
 end
 
 function world:switch_to(index)

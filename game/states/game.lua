@@ -153,7 +153,7 @@ function game:draw()
       constants.SCREEN_RECT, 'retro-computer', 'white', 'center', 'middle', 2, self.alpha)
   elseif self.state == 'done' then
     graphics.fill('black', 127)
-    graphics.text('WRECKED!',
+    graphics.text('DARN!',
       constants.SCREEN_RECT, 'retro-computer', 'white', 'center', 'middle', 2)
     graphics.text('PRESS Z TO RESTART',
       constants.SCREEN_RECT, 'retro-computer', 'white', 'center', 'bottom', 1)
