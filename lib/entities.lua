@@ -110,16 +110,32 @@ end
 
 function Entities:colliding()
   local colliding = {}
-  -- Naive O(n^2) collision resulution algorithm (with not projection at
-  -- all).
-  for _, this in ipairs(self.active) do
-    -- We test for the presence of the [collide] method. If not present, it's
-    -- and "ephemeral" entity (e.g. sparkles, smoke, bubbles, etc...) that we
-    -- will ignore since it does not count for collisions.
+  -- Naive bruteforce O(n^2) collision resulution algorithm (with no
+  -- projection at all). As a minor optimization, we scan the pairing
+  -- square matrix on the upper (or lower) triangle.
+  --
+  --     1 2 3 4
+  --   1 . x x x
+  --   2 . . x x
+  --   3 . . . x
+  --   4 . . . .
+  --
+  -- This needs "n(n-1)/2" checks.
+  --
+  -- Note that we test for the presence of the [collide] method. If not
+  -- present, it's and "ephemeral" entity (e.g. sparkles, smoke, bubbles,
+  -- etc...) that we will ignore since it does not count for collisions.
+  --
+  -- http://buildnewgames.com/broad-phase-collision-detection/
+  -- http://www.java-gaming.org/index.php?topic=29244.0
+  -- http://www.hobbygamedev.com/adv/2d-platformer-advanced-collision-detection/
+  -- http://www.wildbunny.co.uk/blog/2011/12/14/how-to-make-a-2d-platform-game-part-2-collision-detection/
+  for i = 1, #self.active - 1 do
+    local this = self.active[i]
     if this.collide then
-      for _, that in ipairs(self.active) do
-        -- We also check if we are testing an item with itself!
-        if this ~= that and that.collide and this:collide(that) then
+      for j = i + 1, #self.active do
+        local that = self.active[j]
+        if that.collide and this:collide(that) then
           colliding[#colliding + 1] = { this, that }
         end
       end
