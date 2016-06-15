@@ -157,7 +157,7 @@ function Entities:partition(size)
       end
     end
   end
-  
+
   return grid
 end
 
