@@ -41,9 +41,10 @@ end
 
 -- MODULE FUNCTIONS ------------------------------------------------------------
 
-function Entities:initialize(comparator)
+function Entities:initialize(comparator, grid_size)
   -- Store the entity sorting-comparator (optional).
   self.comparator = comparator
+  self.grid_size = grid_size
 
   self:reset()
 end
@@ -51,6 +52,7 @@ end
 function Entities:reset()
   self.active = {}
   self.incoming = {}
+  self.colliding = {}
 end
 
 function Entities:update(dt)
@@ -82,6 +84,16 @@ function Entities:update(dt)
   for _, index in ipairs(zombies) do
     table.remove(self.active, index)
   end
+
+  -- Keep the [colliding] attribute updated with the collision
+  -- list.
+  self.colliding = {}
+  if self.grid_size then
+    local grid = self:partition(self.grid_size)
+    for _, entities in pairs(grid) do
+      self:resolve(entities, self.colliding)
+    end
+  end
 end
 
 function Entities:draw()
@@ -108,8 +120,48 @@ function Entities:push(entity)
   table.insert(self.incoming, entity)
 end
 
-function Entities:colliding()
-  local colliding = {}
+function Entities:partition(size)
+  local grid = {}
+  
+  for _, entity in ipairs(self.active) do
+    -- If the entity does not have both the [collide] and [aabb] methods we
+    -- consider it to be "ephemeral" in nature (e.g. sparkles, smoke, bubbles,
+    -- etc...). It will be ignored and won't count toward collision.
+    if entity.collide and entity.aabb then
+      local aabb = entity.aabb()
+      local left, top, right, bottom = unpack(aabb)
+      local coords = {
+            { left, top },
+            { left, bottom },
+            { right, top },
+            { right, bottom }
+          }
+
+      local cells = {}
+      for _, position in ipairs(coords) do
+        local x, y = unpack(position)
+        local gx, gy = math.floor(x / size), math.floor(y / size)
+        local id = string.format('%d@%d', gx, gy)
+        if not grid[id] then
+          grid[id] = {}
+        end
+        if not cells[id] then
+          table.insert(grid[id], entity)
+        end
+        cells[id] = true
+      end
+
+      entity.cells = {}
+      for id, _ in pairs(cells) do
+        table.insert(entity.cells, id)
+      end
+    end
+  end
+  
+  return grid
+end
+
+function Entities:resolve(entities, colliding)
   -- Naive bruteforce O(n^2) collision resulution algorithm (with no
   -- projection at all). As a minor optimization, we scan the pairing
   -- square matrix on the upper (or lower) triangle.
@@ -130,18 +182,15 @@ function Entities:colliding()
   -- http://www.java-gaming.org/index.php?topic=29244.0
   -- http://www.hobbygamedev.com/adv/2d-platformer-advanced-collision-detection/
   -- http://www.wildbunny.co.uk/blog/2011/12/14/how-to-make-a-2d-platform-game-part-2-collision-detection/
-  for i = 1, #self.active - 1 do
-    local this = self.active[i]
-    if this.collide then
-      for j = i + 1, #self.active do
-        local that = self.active[j]
-        if that.collide and this:collide(that) then
-          colliding[#colliding + 1] = { this, that }
-        end
+  for i = 1, #entities - 1 do
+    local this = entities[i]
+    for j = i + 1, #entities do
+      local that = entities[j]
+      if this:collide(that) then
+        colliding[#colliding + 1] = { this, that }
       end
     end
   end
-  return colliding
 end
 
 function Entities:find(filter)
