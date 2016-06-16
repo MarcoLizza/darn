@@ -36,6 +36,7 @@ function Entity:initialize(parameters)
   self.position = parameters.position or { 0, 0 }
   self.angle = parameters.angle or 0
   self.life = parameters.life or math.huge -- if not provided, entity will be indestructable
+  self.radius = parameters.radius
 end
 
 function Entity:update(dt)
@@ -58,6 +59,11 @@ end
 
 function Entity:is_alive()
   return self.life > 0
+end
+
+function Entity:aabb()
+  local x, y = unpack(self.position)
+  return { x - self.radius, y - self.radius, x + self.radius, y + self.radius }
 end
 
 function Entity:collide(other)
