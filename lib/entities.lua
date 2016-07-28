@@ -137,6 +137,9 @@ function Entities:partition(size)
             { right, bottom }
           }
 
+      -- We find the belonging grid-cell for each of the entity AABB corner,
+      -- in order to deal with boundary-crossing entities. We make sure not
+      -- to store the same entity twice in the same grid-cell.
       local cells = {}
       for _, position in ipairs(coords) do
         local x, y = unpack(position)
@@ -162,7 +165,7 @@ function Entities:partition(size)
 end
 
 function Entities:resolve(entities, colliding)
-  -- Naive bruteforce O(n^2) collision resulution algorithm (with no
+  -- Naive bruteforce O(n^2) collision resolution algorithm (with no
   -- projection at all). As a minor optimization, we scan the pairing
   -- square matrix on the upper (or lower) triangle.
   --
@@ -173,10 +176,6 @@ function Entities:resolve(entities, colliding)
   --   4 . . . .
   --
   -- This needs "n(n-1)/2" checks.
-  --
-  -- Note that we test for the presence of the [collide] method. If not
-  -- present, it's and "ephemeral" entity (e.g. sparkles, smoke, bubbles,
-  -- etc...) that we will ignore since it does not count for collisions.
   --
   -- http://buildnewgames.com/broad-phase-collision-detection/
   -- http://www.java-gaming.org/index.php?topic=29244.0
