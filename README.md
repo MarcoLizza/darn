@@ -2,11 +2,13 @@
 
 ## INTRODUCTION
 
-*Darn!* is my own personal interpretation of the [#1GAM](http://onegameamonth.com) theme, which for May 2016 was set to *RAISON D'ETRE*.
+*Darn!* is my own personal interpretation of the [#1GAM](http://onegameamonth.com) theme, which for June 2016 was set to *COUCH*.
 
-Made during #1GAM May 2016 gamejam.
+Made during #1GAM June 2016 gamejam.
 
 ## GAME STATUS
+
+Prototypal.
 
 ## INSTRUCTIONS
 
